@@ -1,0 +1,117 @@
+name:    haskell-template
+version: "0.0.0"
+default-extensions:
+- NoImplicitPrelude
+- ApplicativeDo
+- BangPatterns
+- ConstraintKinds
+- DataKinds
+- DefaultSignatures
+- DeriveFoldable
+- DeriveFunctor
+- DeriveGeneric
+- DeriveLift
+- DeriveTraversable
+- DerivingStrategies
+- EmptyCase
+- ExistentialQuantification
+- FlexibleContexts
+- FlexibleInstances
+- FunctionalDependencies
+- GADTs
+- GeneralizedNewtypeDeriving
+- InstanceSigs
+- KindSignatures
+- LambdaCase
+- MultiParamTypeClasses
+- MultiWayIf
+- NamedFieldPuns
+- OverloadedStrings
+- PolyKinds
+- RankNTypes
+- ScopedTypeVariables
+- StandaloneDeriving
+- TupleSections
+- TypeApplications
+- TypeFamilies
+- TypeFamilyDependencies
+- TypeOperators
+
+dependencies:
+
+# Due to a bug in GHC 8.0.1, we block its usage
+# See: https://ghc.haskell.org/trac/ghc/ticket/12130
+- base >=4.8.2.0 && <4.9 || >=4.9.1.0 && <5
+
+- aeson
+- aeson-casing
+- fast-logger
+- file-embed
+- http-client
+- http-client-tls
+- jose
+- katip
+- monad-logger
+- persistent
+- persistent-postgresql
+- persistent-template
+- rio
+- safe-money
+- scientific
+- servant
+- servant-auth
+- servant-auth-server
+- servant-server
+- template-haskell
+- time
+- transformers
+- wai
+- wai-extra
+- warp
+- warp-tls
+- yaml
+
+# The library contains all of our application code. The executable
+# defined below is just a thin wrapper.
+library:
+  source-dirs: src
+  when:
+  - condition: (flag(dev)) || (flag(library-only))
+    then:
+      ghc-options:
+      - -Wall
+      - -fwarn-tabs
+      - -O0
+      - -fdefer-typed-holes
+      cpp-options: -DDEVELOPMENT
+    else:
+      ghc-options:
+      - -Wall
+      - -fwarn-tabs
+      - -O2
+      - -fdefer-typed-holes
+
+# Runnable executable for our application
+executables:
+  haskell-template:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskell-template
+    when:
+    - condition: flag(library-only)
+      buildable: false
+
+# Test suite
+tests:
+  haskell-template-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options: -Wall
+    dependencies:
+    - haskell-template
+    - hspec >=2.0.0
